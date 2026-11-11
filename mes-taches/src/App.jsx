@@ -18,7 +18,18 @@ function App() {
   const [erreur, setErreur] = useState(null)
   const [filtre, setFiltre] = useState('toutes')
 
+  const [initialise, setInitialise] = useState(false)
+
   useEffect(() => {
+    const sauvegarde = localStorage.getItem('taches')
+
+    if (sauvegarde) {
+      setTaches(JSON.parse(sauvegarde))
+      setChargement(false)
+      setInitialise(true)
+      return
+    }
+
     let annule = false
 
     fetch('/taches.json')
@@ -42,6 +53,7 @@ function App() {
       .finally(() => {
         if (!annule) {
           setChargement(false)
+          setInitialise(true)
         }
       })
 
@@ -49,6 +61,12 @@ function App() {
       annule = true
     }
   }, [])
+
+  useEffect(() => {
+    if (!initialise) return
+
+    localStorage.setItem('taches', JSON.stringify(taches))
+  }, [taches, initialise])
 
   function ajouterTache(titre) {
     const nouvelleTache = {
@@ -90,6 +108,8 @@ function App() {
   useEffect(() => {
     document.title = `(${restantes}) Mes tâches`
   }, [restantes])
+
+  
 
   return (
     <div className="app">
