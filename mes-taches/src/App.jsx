@@ -5,6 +5,10 @@ import ListeTaches from './components/ListeTaches.jsx'
 import Pied from './components/Pied.jsx'
 import Carte from './components/Carte.jsx'
 import Compteur from './components/Compteur.jsx'
+import FormulaireAjout from './components/FormulaireAjout'
+import Filtres from './components/Filtres'
+import Statistiques from './components/Statistiques'
+
 
 const TACHES_INITIALES = [
   { id: 1, titre: 'Installer Node.js et Vite', terminee: true },
@@ -15,6 +19,17 @@ const TACHES_INITIALES = [
 
 function App() {
   const [taches, setTaches] = useState(TACHES_INITIALES)
+  const [filtre, setFiltre] = useState('toutes')
+
+  function ajouterTache(titre) {
+    const nouvelleTache = {
+      id: Date.now(),
+      titre: titre,
+      terminee: false
+    }
+
+    setTaches([...taches, nouvelleTache])
+  }
 
   function basculerTache(id) {
     setTaches(
@@ -32,6 +47,12 @@ function App() {
     )
   }
 
+  const tachesVisibles = taches.filter(tache => {
+    if (filtre === 'actives') return !tache.terminee
+    if (filtre === 'terminees') return tache.terminee
+    return true
+  })
+
   return (
     <div className="app">
 
@@ -44,12 +65,24 @@ function App() {
         <Compteur />
       </Carte>
 
+      <Carte titre="Ajouter une tâche">
+        <FormulaireAjout onAjouter={ajouterTache} />
+      </Carte>
+
       <Carte titre="Ma liste">
+        <Filtres
+          filtre={filtre}
+          onChanger={setFiltre}
+        />
         <ListeTaches
-          taches={taches}
+          taches={tachesVisibles}
           onBasculer={basculerTache}
           onSupprimer={supprimerTache}
         />
+      </Carte>
+
+      <Carte titre="Statistiques">
+        <Statistiques taches={taches} />
       </Carte>
 
       <Pied auteur="Oussama El Farissi" />
